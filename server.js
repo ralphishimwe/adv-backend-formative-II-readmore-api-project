@@ -15,7 +15,7 @@ mongoose
     console.log('DB connection successful!');
 
     app.listen(port, () => {
-      console.log(`App running on  http://localhost/${port}`);
+      console.log(`App running on  http://localhost:${port}`);
     });
   })
   .catch((err) => {

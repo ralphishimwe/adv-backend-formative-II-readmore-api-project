@@ -14,7 +14,7 @@ const bookSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      require: [true, "A book must have a price"],
+      required: [true, "A book must have a price"],
     },
     publishedYear: {
       type: Number,
@@ -23,7 +23,7 @@ const bookSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Author",
-      require: [true, "A book must belong to an author"],
+      required: [true, "A book must belong to an author"],
     },
   },
   {
