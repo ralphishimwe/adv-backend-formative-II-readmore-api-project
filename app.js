@@ -1,5 +1,6 @@
 const express = require('express');
 const authorRouter = require("./routes/authorRoutes");
+const bookRouter = require("./routes/bookRoutes");
 const app = express();
 
 // Middleware json parsing
@@ -15,5 +16,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/authors", authorRouter);
+app.use("/books", bookRouter)
 
 module.exports = app;
