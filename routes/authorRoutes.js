@@ -1,7 +1,6 @@
 const express = require("express");
 const authorController = require("../controllers/authorController");
 
-
 const router = express.Router();
 
 router
@@ -15,4 +14,6 @@ router
   .put(authorController.updateAuthor)
   .delete(authorController.deleteAuthor);
 
-module.exports = router
+router.route("/:id/books").get(authorController.getAuthorBooks);
+
+module.exports = router;

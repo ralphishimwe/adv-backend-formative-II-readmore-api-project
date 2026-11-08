@@ -1,4 +1,5 @@
 const Author = require("../models/authorModel");
+const Book = requrie("../models/bookModel");
 
 //POST /authors
 exports.createAuthor = async (req, res) => {
@@ -138,4 +139,38 @@ exports.deleteAuthor = async (req, res) => {
             message: err.message
         });
     }
+};
+
+// GET /authors/:id/books
+exports.getAuthorBooks = async (req, res) => {
+  try {
+    //checking if author exists
+    const author = await Author.findById(req.params.id);
+    if (!author) {
+      return res.status(404).json({
+        status: "fail",
+        message: `No author found with ID ${req.params.id}`,
+      });
+    }
+
+    // find everybook where author matches the ID
+    const books = await Book.find({ author: req.params.id });
+    res.status(200).json({
+      status: "success",
+      author: author.name,
+      results: books.length,
+      data: { books },
+    });
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ID: ${err.value}`,
+      });
+    }
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 };
