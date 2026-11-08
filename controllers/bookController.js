@@ -73,7 +73,7 @@ exports.getBook = async (req, res) => {
 // PUT /books/:id
 exports.updateBook = async (req, res) => {
   try {
-    const book = await Book.findByIdUpdate(req.params.id, req.body, {
+    const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
       returnDocument: "after",
       runValidators: true,
     });
