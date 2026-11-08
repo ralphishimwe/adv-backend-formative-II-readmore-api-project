@@ -1,5 +1,5 @@
 const Author = require("../models/authorModel");
-const Book = requrie("../models/bookModel");
+const Book = require("../models/bookModel");
 
 //POST /authors
 exports.createAuthor = async (req, res) => {
