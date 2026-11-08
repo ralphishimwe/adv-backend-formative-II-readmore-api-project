@@ -1,16 +1,19 @@
 const express = require('express');
-
+const authorRouter = require("./routes/authorRoutes");
 const app = express();
 
-// 1) MIDDLEWARES
-app.use(express.json()); // lets us read JSON from req.body
+// Middleware json parsing
+app.use(express.json());
 
-// 2) ROUTES
-app.get('/', (req, res) => {
+
+// ROUTES
+app.get("/", (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'Welcome to the ReadMore API'
   });
 });
+
+app.use("/authors", authorRouter);
 
 module.exports = app;
