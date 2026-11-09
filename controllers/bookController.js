@@ -1,18 +1,58 @@
 const Book = require("../models/bookModel");
 
+//Rule 3 validates price and year and returns error if somethings is wrong
+const checkPriceAndYear = (price, publishedYear) => {
+  const currentYear = new Date().getFullYear();
+  if (price !== undefined && price <= 0) {
+    return "Price must be greater than 0";
+  }
+
+  if (
+    publishedYear !== undefined &&
+    (publishedYear < 1500 || publishedYear > currentYear)
+  ) {
+    return `Published year must be between 1500 and ${currentYear}`;
+  }
+  return null;
+};
+
 //POST /books
 exports.createBook = async (req, res) => {
-  try {
+  try{
+    //checks if there is req.body if none returns error message
+    if (!req.body){
+      return res.status(400).json({
+        status: "fail",
+        message: "No Request body found",
+      });
+    }
+
+    const {title, price, publishedYear, author} = req.body;
+    //rule3 validating price and publishedYear
+    const ruleError = checkPriceAndYear(price, publishedYear);
+    if(ruleError){
+      return res.status(422).json({
+        status: "fail",
+        message: ruleError
+      })
+    }
+
     const newBook = await Book.create(req.body);
     res.status(201).json({
       status: "success",
-      data: { book: newBook },
+      data: {book: newBook},
     });
   } catch (err) {
-    if (err.name === "ValidationError") {
+    if (err.name === "ValidationError"){
       return res.status(400).json({
         status: "fail",
         message: err.message,
+      });
+    }
+    if(err.name === "CastError"){
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ${err.path}: ${err.value}`,
       });
     }
     res.status(500).json({
@@ -20,7 +60,7 @@ exports.createBook = async (req, res) => {
       message: err.message,
     });
   }
-};
+}
 
 //GET /books
 exports.getAllBooks = async (req, res) => {
@@ -72,38 +112,58 @@ exports.getBook = async (req, res) => {
 
 // PUT /books/:id
 exports.updateBook = async (req, res) => {
-  try {
-    const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: "after",
-      runValidators: true,
-    });
+  try{
+    //checks if there is req.body if none returns error message
+    if(!req.body) {
+      return res.status(400).json({
+        status: "fail",
+        message: "No Request body found",
+      })
+    }
+    const {title, price, publishedYear, author} = req.body;
 
-    if (!book) {
+    //checking if the book exists
+    const book = await Book.findById(req.params.id);
+
+    if(!book) {
       return res.status(404).json({
         status: "fail",
         message: `No book found with ID ${req.params.id}`,
       });
     }
 
-    res.status(200).json({
-      status: "success",
-      data: { book },
-    });
-  } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(400).json({
+    //rule 3 price and year must be validated
+    const ruleError = checkPriceAndYear(price, publishedYear);
+    if(ruleError){
+      return res.status(422).json({
         status: "fail",
-        message: `Invalid ${err.path}: ${err.value}`,
+        message: ruleError,
       });
     }
-    if (err.name === "ValidationError") {
+
+    //saving the update
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {book: updatedBook},
+    });
+  } catch(err){
+    if(err.name === "ValidationError"){
       return res.status(400).json({
         status: "fail",
         message: err.message,
-      });
+      })
     }
+    res.status(500).json({
+      status: "error",
+      message: err.message
+    });
   }
-};
+}
 
 // DELETE /books/:id
 exports.deleteBook = async (req, res) => {
