@@ -17,6 +17,15 @@ const checkPriceAndYear = (price, publishedYear) => {
   return null;
 };
 
+//Rule 2 - lokos for a book by the same author and same title {$ne/not equal}
+const findDuplicateTitle = (title, authorId, excludeBookId) => {
+  const filter = { title: String(title).trim(), author: authorId };
+  if (excludeBookId) {
+    filter._id = { $ne: excludeBookId };
+  }
+  return Book.findOne(filter).collation({ locale: "en", strength: 2 });
+};
+
 //POST /books
 exports.createBook = async (req, res) => {
   try {
@@ -45,6 +54,17 @@ exports.createBook = async (req, res) => {
         return res.status(400).json({
           status: "fail",
           message: `No author found with ID ${author}. A book must belong to an existing author.`,
+        });
+      }
+    }
+
+    //rule 2: same author can't have the same title
+    if (title && author) {
+      const duplicate = await findDuplicateTitle(title, author);
+      if (duplicate) {
+        return res.status(409).json({
+          status: "fail",
+          message: `This author already has a book titled "${duplicate.title}`,
         });
       }
     }
@@ -160,6 +180,25 @@ exports.updateBook = async (req, res) => {
         return res.status(400).json({
           status: "fail",
           message: `No author found with ID ${author}, book must belong to an existing author.`,
+        });
+      }
+    }
+
+    // rule2: when updating author no same author for same book title
+    if (title !== undefined || author !== undefined) {
+      //if user sents value use that if not use the current
+      const finalTitle = title || book.title;
+      const finalAuthor = author || book.author;
+
+      const duplicate = await findDuplicateTitle(
+        finalTitle,
+        finalAuthor,
+        book._id,
+      );
+      if (duplicate) {
+        return res.status(409).json({
+          status: "fail",
+          message: `This author already has a book titled "${duplicate.title}"`,
         });
       }
     }
