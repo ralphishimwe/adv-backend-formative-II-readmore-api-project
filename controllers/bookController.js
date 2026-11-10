@@ -1,4 +1,5 @@
 const Book = require("../models/bookModel");
+const Author = require("../models/authorModel");
 
 //Rule 3 validates price and year and returns error if somethings is wrong
 const checkPriceAndYear = (price, publishedYear) => {
@@ -18,38 +19,49 @@ const checkPriceAndYear = (price, publishedYear) => {
 
 //POST /books
 exports.createBook = async (req, res) => {
-  try{
+  try {
     //checks if there is req.body if none returns error message
-    if (!req.body){
+    if (!req.body) {
       return res.status(400).json({
         status: "fail",
         message: "No Request body found",
       });
     }
 
-    const {title, price, publishedYear, author} = req.body;
+    const { title, price, publishedYear, author } = req.body;
     //rule3 validating price and publishedYear
     const ruleError = checkPriceAndYear(price, publishedYear);
-    if(ruleError){
+    if (ruleError) {
       return res.status(422).json({
         status: "fail",
-        message: ruleError
-      })
+        message: ruleError,
+      });
+    }
+
+    //Rule 1 - author must exist
+    if (author) {
+      const authorExists = await Author.exists({ _id: author });
+      if (!authorExists) {
+        return res.status(400).json({
+          status: "fail",
+          message: `No author found with ID ${author}. A book must belong to an existing author.`,
+        });
+      }
     }
 
     const newBook = await Book.create(req.body);
     res.status(201).json({
       status: "success",
-      data: {book: newBook},
+      data: { book: newBook },
     });
   } catch (err) {
-    if (err.name === "ValidationError"){
+    if (err.name === "ValidationError") {
       return res.status(400).json({
         status: "fail",
         message: err.message,
       });
     }
-    if(err.name === "CastError"){
+    if (err.name === "CastError") {
       return res.status(400).json({
         status: "fail",
         message: `Invalid ${err.path}: ${err.value}`,
@@ -60,7 +72,7 @@ exports.createBook = async (req, res) => {
       message: err.message,
     });
   }
-}
+};
 
 //GET /books
 exports.getAllBooks = async (req, res) => {
@@ -112,20 +124,20 @@ exports.getBook = async (req, res) => {
 
 // PUT /books/:id
 exports.updateBook = async (req, res) => {
-  try{
+  try {
     //checks if there is req.body if none returns error message
-    if(!req.body) {
+    if (!req.body) {
       return res.status(400).json({
         status: "fail",
         message: "No Request body found",
-      })
+      });
     }
-    const {title, price, publishedYear, author} = req.body;
+    const { title, price, publishedYear, author } = req.body;
 
     //checking if the book exists
     const book = await Book.findById(req.params.id);
 
-    if(!book) {
+    if (!book) {
       return res.status(404).json({
         status: "fail",
         message: `No book found with ID ${req.params.id}`,
@@ -134,11 +146,22 @@ exports.updateBook = async (req, res) => {
 
     //rule 3 price and year must be validated
     const ruleError = checkPriceAndYear(price, publishedYear);
-    if(ruleError){
+    if (ruleError) {
       return res.status(422).json({
         status: "fail",
         message: ruleError,
       });
+    }
+
+    //rule 1 validating if author is being changed new author must existing
+    if (author !== undefined) {
+      const authorExists = await Author.exists({ _id: author });
+      if (!authorExists) {
+        return res.status(400).json({
+          status: "fail",
+          message: `No author found with ID ${author}, book must belong to an existing author.`,
+        });
+      }
     }
 
     //saving the update
@@ -149,21 +172,21 @@ exports.updateBook = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: {book: updatedBook},
+      data: { book: updatedBook },
     });
-  } catch(err){
-    if(err.name === "ValidationError"){
+  } catch (err) {
+    if (err.name === "ValidationError") {
       return res.status(400).json({
         status: "fail",
         message: err.message,
-      })
+      });
     }
     res.status(500).json({
       status: "error",
-      message: err.message
+      message: err.message,
     });
   }
-}
+};
 
 // DELETE /books/:id
 exports.deleteBook = async (req, res) => {
