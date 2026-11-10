@@ -10,9 +10,9 @@ const checkPriceAndYear = (price, publishedYear) => {
 
   if (
     publishedYear !== undefined &&
-    (publishedYear < 1500 || publishedYear > currentYear)
+    (publishedYear < 1450 || publishedYear > currentYear)
   ) {
-    return `Published year must be between 1500 and ${currentYear}`;
+    return `Published year must be between 1450 and ${currentYear}`;
   }
   return null;
 };
@@ -64,7 +64,7 @@ exports.createBook = async (req, res) => {
       if (duplicate) {
         return res.status(409).json({
           status: "fail",
-          message: `This author already has a book titled "${duplicate.title}`,
+          message: `This author already has a book titled : ${duplicate.title}`,
         });
       }
     }
@@ -198,7 +198,7 @@ exports.updateBook = async (req, res) => {
       if (duplicate) {
         return res.status(409).json({
           status: "fail",
-          message: `This author already has a book titled "${duplicate.title}"`,
+          message: `This author already has a book titled : ${duplicate.title}`,
         });
       }
     }
@@ -220,6 +220,14 @@ exports.updateBook = async (req, res) => {
         message: err.message,
       });
     }
+
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ${err.path}: ${err.value}`,
+      });
+    }
+
     res.status(500).json({
       status: "error",
       message: err.message,
