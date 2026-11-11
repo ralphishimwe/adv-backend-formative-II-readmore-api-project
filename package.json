@@ -1,7 +1,7 @@
 {
   "name": "adv-backend-formative-ii-readmore-api-project",
   "version": "1.0.0",
-  "description": "Your first backend API assignment. Build a small REST API for a bookstore using **Express.js**, with **MongoDB** as the database and **Mongoose** as the modelling layer.",
+  "description": "ReadMore bookstore REST API built with Express, MongoDB and Mongoose",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,7 +13,7 @@
     "url": "git+https://github.com/ralphishimwe/adv-backend-formative-II-readmore-api-project.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ralph Ishimwe",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
