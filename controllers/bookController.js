@@ -94,10 +94,67 @@ exports.createBook = async (req, res) => {
   }
 };
 
-//GET /books
+// GET /books
+// query params: genre, minPrice, maxPrice, author, search
 exports.getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find().populate("author");
+    const { genre, minPrice, maxPrice, author, search } = req.query;
+    const filter = {};
+
+    if (genre) {
+      filter.genre = genre;
+    }
+
+    if (author) {
+      filter.author = author;
+    }
+
+    if (search) {
+      const safeSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.title = { $regex: safeSearch, $options: "i" };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+
+      if (minPrice !== undefined) {
+        if (isNaN(minPrice)) {
+          return res.status(400).json({
+            status: "fail",
+            message: "minPrice must be a number",
+          });
+        }
+        filter.price.$gte = Number(minPrice); // greater than or equal
+      }
+
+      if (maxPrice !== undefined) {
+        if (isNaN(maxPrice)) {
+          return res.status(400).json({
+            status: "fail",
+            message: "maxPrice must be a number",
+          });
+        }
+        filter.price.$lte = Number(maxPrice); // less than or equal
+      }
+
+      if (
+        minPrice !== undefined &&
+        maxPrice !== undefined &&
+        Number(minPrice) > Number(maxPrice)
+      ) {
+        return res.status(400).json({
+          status: "fail",
+          message: "minPrice cannot be greater than maxPrice",
+        });
+      }
+    }
+
+    let query = Book.find(filter)
+      .collation({ locale: "en", strength: 2 })
+      .populate("author");
+
+    // RUN QUERY
+    const books = await query;
 
     res.status(200).json({
       status: "success",
@@ -105,6 +162,12 @@ exports.getAllBooks = async (req, res) => {
       data: { books },
     });
   } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ${err.path}: ${err.value}`,
+      });
+    }
     res.status(500).json({
       status: "error",
       message: err.message,
