@@ -110,35 +110,49 @@ exports.updateAuthor = async (req, res) => {
   }
 };
 
-
 // DELETE /authors/:id
+// Rule 4 – Policy A: block the delete if the author still has books
 exports.deleteAuthor = async (req, res) => {
-    try{
-        const author = await Author.findByIdAndDelete(req.params.id);
-    
-        if(!author) {
-            return res.status(404).json({
-                status: "fail",
-                message: `No author found with ID ${req.params.id}`,
-            });
-        }
-        res.status(204).json({
-            status: "success",
-            data: null,
-        });
+  try {
+    // checking if the author exists
+    const author = await Author.findById(req.params.id);
 
-    } catch (err) {
-        if (err.name === "CastError") {
-            return res.status(400).json({
-                status: "fail",
-                message: `Invalid ID: ${err.value}`
-            });
-        }
-        res.status(500).json({
-            status: "error",
-            message: err.message
-        });
+    if (!author) {
+      return res.status(404).json({
+        status: "fail",
+        message: `No author found with ID ${req.params.id}`,
+      });
     }
+
+    // how many books still belong to this author
+    const bookCount = await Book.countDocuments({ author: req.params.id });
+
+    if (bookCount > 0) {
+      return res.status(409).json({
+        status: "fail",
+        message: `Cannot delete ${author.name}: they still have ${bookCount} book(s). Delete or reassign those books first.`,
+      });
+    }
+
+    // No books  we can delete
+    await Author.findByIdAndDelete(req.params.id);
+
+    res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ID: ${err.value}`,
+      });
+    }
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 };
 
 // GET /authors/:id/books
