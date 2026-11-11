@@ -4,6 +4,13 @@ const Book = require("../models/bookModel");
 //POST /authors
 exports.createAuthor = async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({
+        status: "fail",
+        message: "No Request body found",
+      });
+    }
+
     const newAuthor = await Author.create(req.body);
 
     res.status(201).json({
@@ -75,6 +82,13 @@ exports.getAuthor = async (req, res) => {
 // PUT /authors/:id
 exports.updateAuthor = async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({
+        status: "fail",
+        message: "No Request body found",
+      });
+    }
+
     const author = await Author.findByIdAndUpdate(req.params.id, req.body, {
       returnDocument: "after",
       runValidators: true,
@@ -83,7 +97,7 @@ exports.updateAuthor = async (req, res) => {
     if (!author) {
       return res.status(404).json({
         status: "fail",
-        message: `No author found with id ${req.params.id}`,
+        message: `No author found with ID ${req.params.id}`,
       });
     }
     res.status(200).json({
@@ -94,7 +108,7 @@ exports.updateAuthor = async (req, res) => {
     if (err.name === "CastError") {
       return res.status(400).json({
         status: "fail",
-        message: `Invalid id: ${err.value}`,
+        message: `Invalid ID: ${err.value}`,
       });
     }
     if (err.name === "ValidationError") {
@@ -104,7 +118,7 @@ exports.updateAuthor = async (req, res) => {
       });
     }
     res.status(500).json({
-      status: "fail",
+      status: "error",
       message: err.message,
     });
   }

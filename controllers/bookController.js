@@ -17,7 +17,7 @@ const checkPriceAndYear = (price, publishedYear) => {
   return null;
 };
 
-//Rule 2 - lokos for a book by the same author and same title {$ne/not equal}
+//Rule 2 - looks for a book by the same author and same title {$ne/not equal}
 const findDuplicateTitle = (title, authorId, excludeBookId) => {
   const filter = { title: String(title).trim(), author: authorId };
   if (excludeBookId) {
@@ -365,7 +365,7 @@ exports.deleteBook = async (req, res) => {
     if (!book) {
       return res.status(404).json({
         status: "fail",
-        message: `No book found with id ${req.params.id}`,
+        message: `No book found with ID ${req.params.id}`,
       });
     }
 
