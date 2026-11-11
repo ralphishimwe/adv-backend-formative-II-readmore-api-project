@@ -130,7 +130,7 @@ exports.deleteAuthor = async (req, res) => {
     if (bookCount > 0) {
       return res.status(409).json({
         status: "fail",
-        message: `Cannot delete ${author.name}: they still have ${bookCount} book(s). Delete or reassign those books first.`,
+        message: `Cannot delete ${author.name}: they still have ${bookCount} books. Delete or reassign those books first.`,
       });
     }
 
