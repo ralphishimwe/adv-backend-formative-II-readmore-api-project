@@ -215,8 +215,10 @@ exports.getAllBooks = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      results: books.length,
-      data: { books },
+      page,
+      limit,
+      total,
+      results: books,
     });
   } catch (err) {
     if (err.name === "CastError") {
