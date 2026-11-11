@@ -169,15 +169,47 @@ exports.getAllBooks = async (req, res) => {
         });
       }
 
-      sortBy[sort] = order === "desc" ? -1 : 1; // 1 = ascending (default), -1 = descending
+      sortBy[sort] = order === "desc" ? -1 : 1; // 1 is ascending which is default and -1 is descending
     }
 
-    sortBy._id = 1; // tie-breaker: books with the same value always come back in the same order
+    sortBy._id = 1; //books with the same value always come back in the same order
+
     // Query
     let query = Book.find(filter)
       .collation({ locale: "en", strength: 2 })
       .sort(sortBy)
       .populate("author");
+
+    // PAGINATION – only applied when the client sends page or limit
+    const total = await Book.countDocuments(filter).collation({
+      locale: "en",
+      strength: 2,
+    });
+
+    let page = 1;
+    let limit = total;
+
+    if (req.query.page !== undefined || req.query.limit !== undefined) {
+      page = Number(req.query.page) || 1;
+      limit = Number(req.query.limit) || 10;
+
+      if (
+        !Number.isInteger(page) ||
+        page < 1 ||
+        !Number.isInteger(limit) ||
+        limit < 1
+      ) {
+        return res.status(400).json({
+          status: "fail",
+          message: "page and limit must be positive whole numbers",
+        });
+      }
+
+      limit = Math.min(limit, 100);
+
+      const skip = (page - 1) * limit;
+      query = query.skip(skip).limit(limit);
+    }
 
     const books = await query;
 
@@ -299,7 +331,10 @@ exports.updateBook = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: { book: updatedBook },
+      page,
+      limit,
+      total,
+      results: books,
     });
   } catch (err) {
     if (err.name === "ValidationError") {
