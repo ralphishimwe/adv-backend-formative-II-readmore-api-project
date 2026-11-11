@@ -204,6 +204,7 @@ Good luck — build it one endpoint at a time, and test each in your API client 
 
 ## Video Walkthrough
 🎥 [Watch the video walkthrough](https://youtu.be/lFpiEsvjV5k)
+-> https://youtu.be/lFpiEsvjV5k?si=1r_cr2AaeOsmB2-x
 
 ## How to Run
 1. `npm install`
