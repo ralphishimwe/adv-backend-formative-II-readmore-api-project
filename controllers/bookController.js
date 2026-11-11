@@ -98,7 +98,8 @@ exports.createBook = async (req, res) => {
 // query params: genre, minPrice, maxPrice, author, search
 exports.getAllBooks = async (req, res) => {
   try {
-    const { genre, minPrice, maxPrice, author, search } = req.query;
+    const { genre, minPrice, maxPrice, author, search, sort, order } =
+      req.query;
     const filter = {};
 
     if (genre) {
@@ -148,12 +149,36 @@ exports.getAllBooks = async (req, res) => {
         });
       }
     }
+    // sorting fields
+    if (order && order !== "asc" && order !== "desc") {
+      return res.status(400).json({
+        status: "fail",
+        message: 'order must be "asc" or "desc"',
+      });
+    }
 
+    const sortBy = {};
+
+    if (sort) {
+      const allowedSortFields = ["price", "title", "publishedYear"];
+
+      if (!allowedSortFields.includes(sort)) {
+        return res.status(400).json({
+          status: "fail",
+          message: `You can only sort by: ${allowedSortFields.join(", ")}`,
+        });
+      }
+
+      sortBy[sort] = order === "desc" ? -1 : 1; // 1 = ascending (default), -1 = descending
+    }
+
+    sortBy._id = 1; // tie-breaker: books with the same value always come back in the same order
+    // Query
     let query = Book.find(filter)
       .collation({ locale: "en", strength: 2 })
+      .sort(sortBy)
       .populate("author");
 
-    // RUN QUERY
     const books = await query;
 
     res.status(200).json({
