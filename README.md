@@ -197,4 +197,37 @@ Submit a **a Github repository link** containing your project code. The reposito
 > I will be grading how you *think*, so narrate your decisions — don't just click through.
 
 Good luck — build it one endpoint at a time, and test each in your API client before moving on.
----
+
+-----
+
+# My Submission
+
+## Video Walkthrough
+🎥 [Watch the video walkthrough](VIDEO_LINK)
+
+## How to Run
+1. `npm install`
+2. Copy `.env.example` to `.env` and you add your MongoDB connection string
+3. `npm run dev` → server runs on `http://localhost:3000`
+
+## Project Structure
+
+├── server.js # connects to MongoDB, then starts the server
+├── app.js # Express app, middleware and routes
+├── models/
+│ ├── authorModel.js # Author schema
+│ └── bookModel.js # Book schema
+├── controllers/
+│ ├── authorController.js # author CRUD, books by author, stats, delete policy
+│ └── bookController.js # book CRUD, business rules, filter/sort/pagination
+├── routes/
+│ ├── authorRoutes.js # /authors
+│ └── bookRoutes.js # /books
+└── .env.example # required environment variables
+
+
+## Author Delete Policy (Requirement 4)
+I chose Option A – Block: `DELETE /authors/:id` returns **409** if the author still has books.
+Books may already be linked to sales, so deleting them or crediting them to the wrong
+author (reassign) would damage real data. The disdvantage is that an admin must delete or reassign each
+book first before the author can be removed.
