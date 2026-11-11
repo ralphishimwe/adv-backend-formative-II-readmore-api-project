@@ -211,7 +211,7 @@ Good luck — build it one endpoint at a time, and test each in your API client 
 3. `npm run dev` → server runs on `http://localhost:3000`
 
 ## Project Structure
-
+```
 ├── server.js # connects to MongoDB, then starts the server
 ├── app.js # Express app, middleware and routes
 ├── models/
@@ -224,7 +224,7 @@ Good luck — build it one endpoint at a time, and test each in your API client 
 │ ├── authorRoutes.js # /authors
 │ └── bookRoutes.js # /books
 └── .env.example # required environment variables
-
+```
 
 ## Author Delete Policy (Requirement 4)
 I chose Option A – Block: `DELETE /authors/:id` returns **409** if the author still has books.
