@@ -15,5 +15,6 @@ router
   .delete(authorController.deleteAuthor);
 
 router.route("/:id/books").get(authorController.getAuthorBooks);
+router.route("/:id/stats").get(authorController.getAuthorStats);
 
 module.exports = router;

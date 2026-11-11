@@ -333,10 +333,7 @@ exports.updateBook = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      page,
-      limit,
-      total,
-      results: books,
+      data: { book: updatedBook },
     });
   } catch (err) {
     if (err.name === "ValidationError") {

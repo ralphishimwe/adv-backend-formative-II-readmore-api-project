@@ -188,3 +188,60 @@ exports.getAuthorBooks = async (req, res) => {
     });
   }
 };
+
+// GET /authors/:id/stats
+exports.getAuthorStats = async (req, res) => {
+  try {
+    // checking if author exists
+    const author = await Author.findById(req.params.id);
+
+    if (!author) {
+      return res.status(404).json({
+        status: "fail",
+        message: `No author found with ID ${req.params.id}`,
+      });
+    }
+
+    //Getting author's books, cheapest first
+    const books = await Book.find({ author: req.params.id }).sort({
+      price: 1,
+      _id: 1,
+    });
+
+    // No books yet, return sensible empty values instead of crashing
+    if (books.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        author: author.name,
+        bookCount: 0,
+        averagePrice: null,
+        cheapestBook: null,
+        mostExpensiveBook: null,
+      });
+    }
+
+    //calculating the stats
+    const totalPrice = books.reduce((sum, book) => sum + book.price, 0);
+    const averagePrice = Math.round((totalPrice / books.length) * 100) / 100; // 2 decimal places
+
+    res.status(200).json({
+      status: "success",
+      author: author.name,
+      bookCount: books.length,
+      averagePrice,
+      cheapestBook: books[0].title, 
+      mostExpensiveBook: books[books.length - 1].title,
+    });
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid ID: ${err.value}`,
+      });
+    }
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
