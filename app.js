@@ -16,6 +16,14 @@ app.get("/", (req, res) => {
 });
 
 app.use("/authors", authorRouter);
-app.use("/books", bookRouter)
+app.use("/books", bookRouter);
+
+// Any route not matched above
+app.use((req, res) => {
+  res.status(404).json({
+    status: "fail",
+    message: `Can't find ${req.originalUrl} on this server`,
+  });
+});
 
 module.exports = app;
